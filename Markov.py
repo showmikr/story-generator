@@ -1,4 +1,6 @@
+
 import random
+import io
 
 # master_dict stores the hashed data structure for the markov madel. Words are linked by nesting dictionaries.
 # Ultimately, master_dict will have two nested dictionaries within an outer dictionary.
@@ -24,8 +26,8 @@ def remove_punctuations(string: str):
 # Cleans up and processes a text for use in our data structure
 # This method is specific to the AI assignment text files. You'll have to implement
 # your own line processing function to clean up general text.
-def get_processed_lines(filename: str):
-    file = open(filename, 'r')
+def get_processed_lines(text: str):
+    file = io.StringIO(text)
     lines = []
     line = file.readline()
     while line:
@@ -51,6 +53,7 @@ def get_word_list(lines: list):
 
 # Takes a list of words (our text sample) and places them into a markov model data structure (i.e master_dict)
 def fill_master_dict(list_of_words: list):
+    master_dict.clear() # empty master_dict. This is for AWS lambda: if we're calling the same container again with new text, we want to make sure we're working with an empty master_dict
     for i in range(len(list_of_words) - 2):
         first_word = list_of_words[i]
         if first_word not in master_dict:
@@ -96,7 +99,7 @@ def generate_story():
 
     first_word = random.choice(list(master_dict))
 
-    for i in range(0, 2000, 2):
+    for i in range(0, 500, 2):
         second_word = get_second_word(first_word)
         story_sequence.append(first_word)
         story_sequence.append(second_word)
@@ -131,7 +134,7 @@ def stringify_story(story_sequence):
 def pretty_print_story(story_sequence):
     max_words_per_line = 20
     line_word_count = 0
-    for i in range(0, 2000, 2):
+    for i in range(0, 500, 2):
         print(story_sequence[i], story_sequence[i+1], end=" ")
         line_word_count += 2
         if line_word_count >= max_words_per_line:  # skip line once we print too many words in a single line
